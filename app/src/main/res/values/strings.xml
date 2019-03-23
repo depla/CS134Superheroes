@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">CS 134 Superheroes</string>
+    <string name="question">Question %1$d of %2$d</string>
+    <string name="guess_superhero">Guess the Superhero</string>
+    <string name="guess_superpower">Guess the Super Power</string>
+    <string name="guess_the_one_thing">Guess the One Thing</string>
+    <string name="image_description">Image of the current super hero in the quiz</string>
+    <string name="results">%1$d guesses, %2$.01f%% correct</string>
+    <string name="reset_quiz">Reset Quiz</string>
+    <string name="incorrect_answer">Incorrect!</string>
+</resources>
