@@ -2,8 +2,10 @@ package edu.miracosta.cs134;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.drawable.Drawable;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AlertDialog;
@@ -15,6 +17,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,11 +30,18 @@ import edu.miracosta.cs134.model.JSONLoader;
 import edu.miracosta.cs134.model.SuperHero;
 
 /**
- * Activity that displays the game to the user and handles the gameplay.
+ * Activity that displays the game to the user and handles the gameplay. Lets the user choose
+ * what quiz they want to take
+ *
+ * @author Dennis La
+ * @version 1.0
  */
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "CS134 Super Hero Quiz";
+    private static final String NAME_QUIZ = "NAME";
+    private static final String POWER_QUIZ = "POWER";
+    private static final String ONE_THING_QUIZ = "ONE_THING";
 
     private static final int HEROES_IN_QUIZ = 10;
 
@@ -45,9 +55,18 @@ public class MainActivity extends AppCompatActivity {
     private Handler handler; // used to delay loading next hero
 
     private TextView mQuestionNumberTextView; // shows current question #
+    private TextView mGuessHeroTextView;
     private ImageView mHeroImageView; // displays a hero
     private TextView mAnswerTextView; // displays correct answer
 
+    private String quizTypeString = NAME_QUIZ;
+    private MediaPlayer correctSound;
+    private MediaPlayer incorrectSound;
+
+    /**
+     * Creates and inflates the layout of the quiz and also initializes the sounds
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,6 +80,10 @@ public class MainActivity extends AppCompatActivity {
         mQuestionNumberTextView = findViewById(R.id.questionNumberTextView);
         mHeroImageView = findViewById(R.id.heroImageView);
         mAnswerTextView = findViewById(R.id.answerTextView);
+        mGuessHeroTextView = findViewById(R.id.guessHeroTextView);
+
+        correctSound = MediaPlayer.create(this, R.raw.success);
+        incorrectSound = MediaPlayer.create(this, R.raw.failed);
 
         // DONE: Put all 4 buttons in the array (mButtons)
         mButtons[0] = findViewById(R.id.button);
@@ -100,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
         // DONE: Clear list of quiz heroes (for prior games played)
         mQuizHeroesList.clear();
 
-        // TODO: Randomly add FLAGS_IN_QUIZ (10) countries from the mAllCountriesList into the mQuizCountriesList
+        // DONE: Randomly add HEROES_IN_QUIZ (10) heroes from the mAllHeroesList into the mQuizHeroesList
         int size = mAllHeroesList.size();
         int randomPosition;
         SuperHero randomHero;
@@ -118,21 +141,13 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        //Lets set the text of the 4 buttons to the first 4 hero names
-        for(int i = 0; i < mButtons.length; i++)
-        {
-            mButtons[i].setText(mQuizHeroesList.get(i).getName());
-        }
-
-
-
         // DONE: Start the quiz by calling loadNextHero
         loadNextHero();
     }
 
     /**
-     * Method initiates the process of loading the next flag for the quiz, showing
-     * the flag's image and then 4 buttons, one of which contains the correct answer.
+     * Method initiates the process of loading the next hero for the quiz, showing
+     * the hero's image and then 4 buttons, one of which contains the correct answer.
      */
     private void loadNextHero() {
         // DONE: Initialize the mCorrectHero by removing the item at position 0 in the mQuizHeroesList
@@ -157,9 +172,6 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, e.getMessage());
         }
 
-
-
-
         // DONE: Get an InputStream to the asset representing the next hero
         // DONE: and try to use the InputStream to create a Drawable
         // DONE: The file name can be retrieved from the correct hero's file name.
@@ -176,21 +188,45 @@ public class MainActivity extends AppCompatActivity {
         for(int i = 0; i < mButtons.length; i++)
         {
             mButtons[i].setEnabled(true);
-            mButtons[i].setText(mAllHeroesList.get(i).getName());
+
+            if(quizTypeString.equals(NAME_QUIZ))
+            {
+                mButtons[i].setText(mAllHeroesList.get(i).getName());
+            }
+            else if(quizTypeString.equals(POWER_QUIZ))
+            {
+                mButtons[i].setText(mAllHeroesList.get(i).getSuperPower());
+            }
+            else if(quizTypeString.equals(ONE_THING_QUIZ))
+            {
+                mButtons[i].setText(mAllHeroesList.get(i).getOneThing());
+            }
         }
 
         // DONE: in the all heroes list
 
 
         // DONE: After the loop, randomly replace one of the 4 buttons with the name of the correct hero
-        mButtons[rng.nextInt(mButtons.length)].setText(mCorrectHero.getName());
+
+        if(quizTypeString.equals(NAME_QUIZ))
+        {
+            mButtons[rng.nextInt(mButtons.length)].setText(mCorrectHero.getName());
+        }
+        else if(quizTypeString.equals(POWER_QUIZ))
+        {
+            mButtons[rng.nextInt(mButtons.length)].setText(mCorrectHero.getSuperPower());
+        }
+        else if(quizTypeString.equals(ONE_THING_QUIZ))
+        {
+            mButtons[rng.nextInt(mButtons.length)].setText(mCorrectHero.getOneThing());
+        }
 
     }
 
     /**
-     * Handles the click event of one of the 4 buttons indicating the guess of a country's name
-     * to match the flag image displayed.  If the guess is correct, the country's name (in GREEN) will be shown,
-     * followed by a slight delay of 2 seconds, then the next flag will be loaded.  Otherwise, the
+     * Handles the click event of one of the 4 buttons indicating the guess of a hero's attribute
+     * to match the hero image displayed.  If the guess is correct, the hero's name (in GREEN) will be shown,
+     * followed by a slight delay of 2 seconds, then the next hero will be loaded.  Otherwise, the
      * word "Incorrect Guess" will be shown in RED and the button will be disabled.
      * @param v
      */
@@ -198,15 +234,39 @@ public class MainActivity extends AppCompatActivity {
 
         mTotalGuesses++;
 
-        // TODO: Downcast the View v into a Button (since it's one of the 4 buttons)
+        // DONE: Downcast the View v into a Button (since it's one of the 4 buttons)
         Button clickedButton = (Button) v;
 
-        // TODO: Get the heroes's name from the text of the button
-        String guessedName = clickedButton.getText().toString();
+        // DONE: Get the heroes's name from the text of the button
+        String guessedItem = clickedButton.getText().toString();
 
-        // TODO: If the guess matches the correct heroes's name, increment the number of correct guesses,
-        if(guessedName.equalsIgnoreCase(mCorrectHero.getName()))
+        // DONE: If the guess matches the correct heroes's name, increment the number of correct guesses,
+        String correctItem = "";
+
+        if(quizTypeString.equals(NAME_QUIZ))
         {
+            correctItem = mCorrectHero.getName();
+        }
+        else if(quizTypeString.equals(POWER_QUIZ))
+        {
+            correctItem = mCorrectHero.getSuperPower();
+        }
+        else if(quizTypeString.equals(ONE_THING_QUIZ))
+        {
+            correctItem = mCorrectHero.getOneThing();
+        }
+
+        // DONE: then display correct answer in green text.  Also, disable all 4 buttons (can't keep guessing once it's correct)
+        // DONE: Nested in this decision, if the user has completed all 10 questions, show an AlertDialog
+        // DONE: with the statistics and an option to Reset Quiz
+
+        // DONE: Else, the answer is incorrect, so display "Incorrect Guess!" in red
+        // DONE: and disable just the incorrect button.
+
+        if(guessedItem.equalsIgnoreCase(correctItem))
+        {
+            correctSound.start();
+
             mCorrectGuesses++;
 
             //game is not over yet! ( < 10 )
@@ -219,7 +279,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 //change the answer text to correct answer
                 //make the text green
-                mAnswerTextView.setText(mCorrectHero.getName());
+                mAnswerTextView.setText(correctItem);
                 mAnswerTextView.setTextColor(getResources().getColor(R.color.correct_answer));
 
                 //call load next hero after pausing for 2 seconds == 2000 ms
@@ -235,9 +295,11 @@ public class MainActivity extends AppCompatActivity {
             }
             else //game over
             {
+                correctSound.start();
+
                 //change the answer text to correct answer
                 //make the text green
-                mAnswerTextView.setText(mCorrectHero.getName());
+                mAnswerTextView.setText(correctItem);
                 mAnswerTextView.setTextColor(getResources().getColor(R.color.correct_answer));
 
                 //create an alert dialog with some text and a button to reset the quiz (Start a new game)
@@ -267,75 +329,94 @@ public class MainActivity extends AppCompatActivity {
         }
         else //incorrect guess
         {
+            incorrectSound.start();
             //disable the button
             clickedButton.setEnabled(false);
             mAnswerTextView.setText(getString(R.string.incorrect_answer));
             mAnswerTextView.setTextColor(getResources().getColor(R.color.incorrect_answer));
         }
 
-        // TODO: then display correct answer in green text.  Also, disable all 4 buttons (can't keep guessing once it's correct)
-        // TODO: Nested in this decision, if the user has completed all 10 questions, show an AlertDialog
-        // TODO: with the statistics and an option to Reset Quiz
-
-        // TODO: Else, the answer is incorrect, so display "Incorrect Guess!" in red
-        // TODO: and disable just the incorrect button.
-
-
-
     }
 
 
     /**
-     * inflates menu_settings.xml
+     * inflates settings_drop_down.xml
      *
      * @param menu the settings menu
-     * @return
+     * @return a boolean
      */
-    /*
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        getMenuInflater().inflate(R.menu.menu_settings, menu);
+        //getMenuInflater().inflate(R.menu.menu_settings, menu);
+        getMenuInflater().inflate(R.menu.settings_drop_down, menu);
 
         return super.onCreateOptionsMenu(menu);
     }
 
     /**
-     * starts the SettingsActivity when the setting MenuItem is selected
+     * updates the quiz depending on item pressed
      *
      * @param item the setting MenuItem pressed
-     * @return
+     * @return a boolean
      */
-    /*
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Intent settingsIntent = new Intent(this, SettingsActivity.class);
+        //Intent settingsIntent = new Intent(this, SettingsActivity.class);
 
-        startActivity(settingsIntent);
+        //startActivity(settingsIntent);
+
+        switch (item.getItemId())
+        {
+            case R.id.nameButton:
+            {
+                quizTypeString = NAME_QUIZ;
+                mGuessHeroTextView.setText(R.string.guess_superhero);
+                break;
+            }
+            case R.id.powerButton:
+            {
+                quizTypeString = POWER_QUIZ;
+                mGuessHeroTextView.setText(R.string.guess_superpower);
+                break;
+            }
+            case R.id.oneThingButton:
+            {
+                quizTypeString = ONE_THING_QUIZ;
+                mGuessHeroTextView.setText(R.string.guess_the_one_thing);
+                break;
+            }
+
+        }
+
+        resetQuiz();
 
         return super.onOptionsItemSelected(item);
     }
-    */
 
 
+    /**
+     * unfinished OnSharedPreferenceChangeListener, couldn't get it to work :(
+     */
     /*SharedPreferences.OnSharedPreferenceChangeListener
             mSharedPreferenceChangeListener =
             new SharedPreferences.OnSharedPreferenceChangeListener() {
                 @Override
                 public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
-                                                      String key) {
-                    if (key.equals(REGIONS)) {
-                        String region = sharedPreferences.getString(REGIONS, getString(R.string.default_region));
-                        updateRegion(region);
+                                                      String key)
+                {
+                    if (key.equals("pref_typeOfQuiz"))
+                    {
+                        String quizType = sharedPreferences.getString("pref_typeOfQuiz", getString(R.string.default_quiz));
+
+
+                        //updateQuiz(quizType);
                         resetQuiz();
                     }
-                    else if (key.equals(CHOICES)) {
-                        mChoices = Integer.parseInt(sharedPreferences.getString(CHOICES, getString(R.string.default_choices)));
-                        updateChoices();
-                        resetQuiz();
-                    }
+
                     Toast.makeText(MainActivity.this, R.string.restarting_quiz, Toast.LENGTH_SHORT).show();
                 } };
+*/
 
-                */
 }

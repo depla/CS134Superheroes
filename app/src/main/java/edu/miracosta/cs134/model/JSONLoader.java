@@ -15,6 +15,9 @@ import java.util.List;
 /**
  * Class loads CS134Superheroes data from a formatted JSON (JavaScript Object Notation) file.
  * Populates data model (SuperHero) with data.
+ *
+ * @author Dennis La
+ * @version 1.0
  */
 public class JSONLoader {
 
@@ -60,9 +63,6 @@ public class JSONLoader {
                 allSuperHeroList.add(superHero);
 
             }
-
-
-
 
 
         } catch (JSONException e) {

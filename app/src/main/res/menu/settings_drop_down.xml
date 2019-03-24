@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id= "@+id/nameButton"
+        android:title="Superhero Name"
+        app:showAsAction="never" />
+
+    <item android:id= "@+id/powerButton"
+        android:title="Superpower"
+        app:showAsAction="never" />
+
+    <item android:id= "@+id/oneThingButton"
+        android:title="One Thing"
+        app:showAsAction="never" />
+</menu>
