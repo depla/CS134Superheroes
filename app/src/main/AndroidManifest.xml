@@ -11,12 +11,12 @@
         android:theme="@style/AppTheme">
         <activity android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName=".QuizActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="edu.miracosta.cs134.MainActivity" />
+                android:value="edu.miracosta.cs134.QuizActivity" />
         </activity>
-        <activity android:name=".MainActivity"
+        <activity android:name=".QuizActivity"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

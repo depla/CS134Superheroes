@@ -1,8 +1,6 @@
 package edu.miracosta.cs134;
 
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
@@ -17,7 +15,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,7 +33,7 @@ import edu.miracosta.cs134.model.SuperHero;
  * @author Dennis La
  * @version 1.0
  */
-public class MainActivity extends AppCompatActivity {
+public class QuizActivity extends AppCompatActivity {
 
     private static final String TAG = "CS134 Super Hero Quiz";
     private static final String NAME_QUIZ = "NAME";
@@ -70,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_quiz);
 
         mQuizHeroesList = new ArrayList<>(HEROES_IN_QUIZ);
         rng = new SecureRandom();
@@ -94,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
         // DONE: Set mQuestionNumberTextView's text to the appropriate strings.xml resource
         mQuestionNumberTextView.setText(getString(R.string.question, 1, HEROES_IN_QUIZ));
 
-        // DONE: Load all the countries from the JSON file using the JSONLoader
+        // DONE: Load all the heroes from the JSON file using the JSONLoader
         try
         {
             mAllHeroesList = JSONLoader.loadJSONFromAsset(this);
@@ -228,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
      * to match the hero image displayed.  If the guess is correct, the hero's name (in GREEN) will be shown,
      * followed by a slight delay of 2 seconds, then the next hero will be loaded.  Otherwise, the
      * word "Incorrect Guess" will be shown in RED and the button will be disabled.
-     * @param v
+     * @param v the button pressed
      */
     public void makeGuess(View v) {
 
@@ -237,10 +234,10 @@ public class MainActivity extends AppCompatActivity {
         // DONE: Downcast the View v into a Button (since it's one of the 4 buttons)
         Button clickedButton = (Button) v;
 
-        // DONE: Get the heroes's name from the text of the button
+        // DONE: Get the heroes's attribute from the text of the button
         String guessedItem = clickedButton.getText().toString();
 
-        // DONE: If the guess matches the correct heroes's name, increment the number of correct guesses,
+        // DONE: If the guess matches the correct heroes's attribute, increment the number of correct guesses,
         String correctItem = "";
 
         if(quizTypeString.equals(NAME_QUIZ))
@@ -349,23 +346,24 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        //getMenuInflater().inflate(R.menu.menu_settings, menu);
+        //getMenuInflater().inflate(R.menu.menu_settings, menu); //for menu icon
+
         getMenuInflater().inflate(R.menu.settings_drop_down, menu);
 
         return super.onCreateOptionsMenu(menu);
     }
 
     /**
-     * updates the quiz depending on item pressed
+     * sets the quiz type depending on item pressed
      *
      * @param item the setting MenuItem pressed
      * @return a boolean
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        //Intent settingsIntent = new Intent(this, SettingsActivity.class);
+        //Intent settingsIntent = new Intent(this, SettingsActivity.class); //for settings fragment
 
-        //startActivity(settingsIntent);
+        //startActivity(settingsIntent); //for settings fragment
 
         switch (item.getItemId())
         {
@@ -415,7 +413,7 @@ public class MainActivity extends AppCompatActivity {
                         resetQuiz();
                     }
 
-                    Toast.makeText(MainActivity.this, R.string.restarting_quiz, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(QuizActivity.this, R.string.restarting_quiz, Toast.LENGTH_SHORT).show();
                 } };
 */
 

@@ -8,7 +8,7 @@ import android.os.Bundle;
  * Activity for choose what quiz to take
  *
  * @author Dennis La
- * @version
+ * @version 1.0
  */
 public class SettingsActivity extends AppCompatActivity {
 
